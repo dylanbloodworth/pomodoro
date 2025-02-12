@@ -11,7 +11,9 @@ import (
 )
 
 type model struct {
-	heading string
+	curTime   int64 // current time on the timer
+	poms      int8  //number of pomodoros completed
+	totalPoms int8  //total amount of poms that want to be run
 }
 
 func (m model) Init() tea.Cmd {
@@ -38,15 +40,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	return m.heading
+	s := "\n ------- Pomodoro Timer -------- \n"
+	s += fmt.Sprintf(" ---- Poms Complete : %d / %d ---- ", m.poms, m.totalPoms)
+	return s
 }
 
-func InitialModel() model {
-	return model{heading: "hello"}
+func InitialModel(totalPoms int8) model {
+	return model{curTime: 0, poms: 0, totalPoms: totalPoms}
 }
 
 func main() {
-	p := tea.NewProgram(InitialModel())
+	p := tea.NewProgram(InitialModel(10))
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)
 		os.Exit(1)
