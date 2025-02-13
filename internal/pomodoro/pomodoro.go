@@ -6,6 +6,7 @@ package pomodoro
 import (
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"time"
 )
 
@@ -116,6 +117,11 @@ func (p pomodoro) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return p, nil
 }
 
+var (
+	app    = lipgloss.NewStyle().Foreground(lipgloss.Color("231")).Border(lipgloss.DoubleBorder()).BorderForeground(lipgloss.Color("8")).Margin(1).Padding(0, 0, 0, 2)
+	status = lipgloss.NewStyle().Foreground(lipgloss.Color("177")).Padding(1, 0, 0, 0)
+)
+
 // View returns a string which represents the rendering of the TUI.
 //
 // It renders a header with the currently complete pomodoro cycles,
@@ -124,10 +130,12 @@ func (p pomodoro) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 // the status of the pomodoro cycle, and the progress bar. All of
 // pomodoro type fields are rendered.
 func (m pomodoro) View() string {
-	s := "\n ------- Pomodoro Timer -------- \n"
-	s += fmt.Sprintf(" ---- Poms Complete : %d / %d ---- \n", m.poms, m.totalPoms)
-	s += fmt.Sprintf(" (%v) | Time: %v  ", statusCodes[m.status], m.curTime)
-	s += m.progress
-	s += "\n"
-	return s
+
+	heading := fmt.Sprintf("Pomodoro Timer: %v \nPoms Complete: %d / %d", m.curTime.String(), m.poms, m.totalPoms)
+	statusPrompt := status.Render(fmt.Sprintf("(%v) ", statusCodes[m.status]))
+	endPrompt := lipgloss.NewStyle().Foreground(lipgloss.Color("0")).Padding(2, 0, 0, 0).Render("press <ecs> to end")
+
+	s := heading + statusPrompt + endPrompt
+
+	return app.Render(s)
 }
