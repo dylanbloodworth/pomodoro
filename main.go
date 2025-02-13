@@ -46,10 +46,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case TickMsg:
 
 		//Quit Program after 10 seconds
-		if m.curTime == 1*time.Minute+30*time.Second {
+		if m.curTime == 0 {
 			return m, tea.Quit
 		} else {
-			m.curTime += time.Second // update timer every second
+			m.curTime -= time.Second // update timer every second
+
+			//Check if 15 seconds has passed to update the progress bar
 			if m.curTime%(15*time.Second) == 0 {
 				m.progress += "%"
 			}
@@ -69,12 +71,12 @@ func (m model) View() string {
 	return s
 }
 
-func InitialModel(totalPoms int8) model {
-	return model{curTime: 0, poms: 0, totalPoms: totalPoms, progress: ""}
+func InitialModel(curTime time.Duration, totalPoms int8) model {
+	return model{curTime: curTime, poms: 0, totalPoms: totalPoms, progress: ""}
 }
 
 func main() {
-	p := tea.NewProgram(InitialModel(10))
+	p := tea.NewProgram(InitialModel(time.Minute, 10))
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("There's been an error: %v", err)
 		os.Exit(1)
