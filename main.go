@@ -9,12 +9,12 @@ import (
 )
 
 var poms int8
-var totalPoms int8
+var totalPoms int8 = 4
 
 var statusCodes map[int8]string = map[int8]string{
 	0: "Focusing",
-	1: "On Short Break",
-	2: "On Long Break",
+	1: "Short Break",
+	2: "Long Break",
 }
 
 // Run the application
@@ -76,6 +76,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			switch m.status {
 			case 0:
 				m.poms += 1
+				if m.poms == m.totalPoms {
+					return m, tea.Quit
+				}
+
 				if m.poms%4 == 0 && m.poms != 0 {
 					m.status = 2
 					m.curTime = 10 * time.Second
@@ -105,7 +109,7 @@ func (m model) View() string {
 
 	s := "\n ------- Pomodoro Timer -------- \n"
 	s += fmt.Sprintf(" ---- Poms Complete : %d / %d ---- \n", m.poms, m.totalPoms)
-	s += fmt.Sprintf(" | Time: %v  ", m.curTime)
+	s += fmt.Sprintf(" (%v) | Time: %v  ", statusCodes[m.status], m.curTime)
 	s += m.progress
 	s += "\n"
 	return s
