@@ -84,11 +84,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.curTime = 5 * time.Second
 				}
 
-			case 1:
-				m.status = 0
-				m.curTime = 15 * time.Second
-
-			case 2:
+			default:
 				m.status = 0
 				m.curTime = 15 * time.Second
 			}
