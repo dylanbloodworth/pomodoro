@@ -8,17 +8,26 @@ import (
 	"time"
 )
 
+var poms int8
+var totalPoms int8
+
+var statusCodes map[int8]string = map[int8]string{
+	0: "Focusing",
+	1: "On Short Break",
+	2: "On Long Break",
+}
+
 // Run the application
 func main() {
-	p := tea.NewProgram(InitialModel(3*time.Second, 10)) //start from the initial model
+	p := tea.NewProgram(FocusModel(3 * time.Second)) //start from the initial model
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("There's been an error: %v", err)
 		os.Exit(1)
 	}
 }
 
-func InitialModel(curTime time.Duration, totalPoms int8) model {
-	return model{curTime: curTime, poms: 0, totalPoms: totalPoms, progress: ""}
+func FocusModel(curTime time.Duration) model {
+	return model{curTime: curTime, poms: poms, totalPoms: totalPoms, status: 0, progress: ""}
 }
 
 // Create a Msg to update the module based on time
@@ -34,6 +43,7 @@ type model struct {
 	curTime   time.Duration // current time on the timer
 	poms      int8          //number of pomodoros completed
 	totalPoms int8          //total amount of poms that want to be run
+	status    int8          //Status of the model (compare to status codes)
 	progress  string        //String representing the progress bar
 }
 
@@ -80,7 +90,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() string {
 	s := "\n ------- Pomodoro Timer -------- \n"
 	s += fmt.Sprintf(" ---- Poms Complete : %d / %d ---- \n", m.poms, m.totalPoms)
-	s += fmt.Sprintf("Time: %v  ", m.curTime)
+	s += fmt.Sprint(statusCodes[m.status])
+	s += fmt.Sprintf(" | Time: %v  ", m.curTime)
 	s += m.progress
 	s += "\n"
 	return s
