@@ -8,16 +8,26 @@ import (
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
 	"os"
+	"time"
 )
 
+// Create a Msg to update the module
+type TickMsg time.Time
+
+func tickEvery() tea.Cmd {
+	return tea.Every(time.Second, func(t time.Time) tea.Msg {
+		return TickMsg(t)
+	})
+}
+
 type model struct {
-	curTime   int64 // current time on the timer
-	poms      int8  //number of pomodoros completed
-	totalPoms int8  //total amount of poms that want to be run
+	curTime   time.Duration // current time on the timer
+	poms      int8          //number of pomodoros completed
+	totalPoms int8          //total amount of poms that want to be run
 }
 
 func (m model) Init() tea.Cmd {
-	return nil
+	return tickEvery()
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -34,6 +44,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			//Return the model and quit
 			return m, tea.Quit
 		}
+
+	case TickMsg:
+		m.curTime += time.Second
+		return m, tickEvery()
 	}
 
 	return m, nil
@@ -41,7 +55,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	s := "\n ------- Pomodoro Timer -------- \n"
-	s += fmt.Sprintf(" ---- Poms Complete : %d / %d ---- ", m.poms, m.totalPoms)
+	s += fmt.Sprintf(" ---- Poms Complete : %d / %d ---- \n", m.poms, m.totalPoms)
+	s += fmt.Sprintf("Time: %v", m.curTime)
 	return s
 }
 
