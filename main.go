@@ -19,7 +19,7 @@ var statusCodes map[int8]string = map[int8]string{
 
 // Run the application
 func main() {
-	p := tea.NewProgram(FocusModel(3 * time.Second)) //start from the initial model
+	p := tea.NewProgram(FocusModel(15 * time.Second)) //start from the initial model
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("There's been an error: %v", err)
 		os.Exit(1)
@@ -71,11 +71,32 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		switch m.curTime {
 		case 0:
-			return m, tea.Quit
+			m.progress = " "
+
+			switch m.status {
+			case 0:
+				m.poms += 1
+				if m.poms%4 == 0 && m.poms != 0 {
+					m.status = 2
+					m.curTime = 10 * time.Second
+				} else {
+					m.status = 1
+					m.curTime = 5 * time.Second
+				}
+
+			case 1:
+				m.status = 0
+				m.curTime = 15 * time.Second
+
+			case 2:
+				m.status = 0
+				m.curTime = 15 * time.Second
+			}
+			return m, tickEvery()
+
 		default:
 			m.curTime -= time.Second
-
-			if m.curTime%(15*time.Second) == 0 {
+			if m.curTime%(time.Second) == 0 {
 				m.progress += "%"
 			}
 			return m, tickEvery()
@@ -85,9 +106,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
+
 	s := "\n ------- Pomodoro Timer -------- \n"
 	s += fmt.Sprintf(" ---- Poms Complete : %d / %d ---- \n", m.poms, m.totalPoms)
-	s += fmt.Sprint(statusCodes[m.status])
 	s += fmt.Sprintf(" | Time: %v  ", m.curTime)
 	s += m.progress
 	s += "\n"
