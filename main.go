@@ -45,9 +45,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 
+	// Update every second
 	case TickMsg:
-		m.curTime += time.Second
-		return m, tickEvery()
+		//Quit Program after 10 seconds
+		if m.curTime == 10*time.Second {
+			return m, tea.Quit
+		} else {
+			m.curTime += time.Second // update timer every second
+			return m, tickEvery()
+		}
 	}
 
 	return m, nil
