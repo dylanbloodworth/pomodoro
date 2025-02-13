@@ -69,21 +69,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// Update every second
 	case TickMsg:
 
-		//Quit Program after 10 seconds
-		if m.curTime == 0 {
+		switch m.curTime {
+		case 0:
 			return m, tea.Quit
-		} else {
-			m.curTime -= time.Second // update timer every second
+		default:
+			m.curTime -= time.Second
 
-			//Check if 15 seconds has passed to update the progress bar
 			if m.curTime%(15*time.Second) == 0 {
 				m.progress += "%"
 			}
-
 			return m, tickEvery()
 		}
 	}
-
 	return m, nil
 }
 
