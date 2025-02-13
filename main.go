@@ -1,9 +1,5 @@
 package main
 
-// These imports will be used later on the tutorial. If you save the file
-// now, Go might complain they are unused, but that's fine.
-// You may also need to run `go mod tidy` to download bubbletea and its
-// dependencies.
 import (
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
@@ -24,6 +20,7 @@ type model struct {
 	curTime   time.Duration // current time on the timer
 	poms      int8          //number of pomodoros completed
 	totalPoms int8          //total amount of poms that want to be run
+	progress  string        //String representing the progress bar
 }
 
 func (m model) Init() tea.Cmd {
@@ -47,11 +44,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// Update every second
 	case TickMsg:
+
 		//Quit Program after 10 seconds
-		if m.curTime == 10*time.Second {
+		if m.curTime == 1*time.Minute+30*time.Second {
 			return m, tea.Quit
 		} else {
 			m.curTime += time.Second // update timer every second
+			if m.curTime%(15*time.Second) == 0 {
+				m.progress += "%"
+			}
+
 			return m, tickEvery()
 		}
 	}
@@ -62,18 +64,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() string {
 	s := "\n ------- Pomodoro Timer -------- \n"
 	s += fmt.Sprintf(" ---- Poms Complete : %d / %d ---- \n", m.poms, m.totalPoms)
-	s += fmt.Sprintf("Time: %v", m.curTime)
+	s += fmt.Sprintf("Time: %v  ", m.curTime)
+	s += m.progress
 	return s
 }
 
 func InitialModel(totalPoms int8) model {
-	return model{curTime: 0, poms: 0, totalPoms: totalPoms}
+	return model{curTime: 0, poms: 0, totalPoms: totalPoms, progress: ""}
 }
 
 func main() {
 	p := tea.NewProgram(InitialModel(10))
 	if _, err := p.Run(); err != nil {
-		fmt.Printf("Alas, there's been an error: %v", err)
+		fmt.Printf("There's been an error: %v", err)
 		os.Exit(1)
 	}
 }
