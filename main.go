@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/charmbracelet/bubbles/textinput"
+	// "github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"os"
 	"time"
@@ -10,7 +10,7 @@ import (
 
 // Run the application
 func main() {
-	p := tea.NewProgram(InitialModel(time.Minute, 10)) //start from the initial model
+	p := tea.NewProgram(InitialModel(3*time.Second, 10)) //start from the initial model
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("There's been an error: %v", err)
 		os.Exit(1)
@@ -51,7 +51,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 
 		//If the key was enter
-		case "enter":
+		case "esc":
 			//Return the model and quit
 			return m, tea.Quit
 		}
@@ -82,5 +82,6 @@ func (m model) View() string {
 	s += fmt.Sprintf(" ---- Poms Complete : %d / %d ---- \n", m.poms, m.totalPoms)
 	s += fmt.Sprintf("Time: %v  ", m.curTime)
 	s += m.progress
+	s += "\n"
 	return s
 }
