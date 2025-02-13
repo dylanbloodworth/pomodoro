@@ -2,12 +2,26 @@ package main
 
 import (
 	"fmt"
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"os"
 	"time"
 )
 
-// Create a Msg to update the module
+// Run the application
+func main() {
+	p := tea.NewProgram(InitialModel(time.Minute, 10)) //start from the initial model
+	if _, err := p.Run(); err != nil {
+		fmt.Printf("There's been an error: %v", err)
+		os.Exit(1)
+	}
+}
+
+func InitialModel(curTime time.Duration, totalPoms int8) model {
+	return model{curTime: curTime, poms: 0, totalPoms: totalPoms, progress: ""}
+}
+
+// Create a Msg to update the module based on time
 type TickMsg time.Time
 
 func tickEvery() tea.Cmd {
@@ -69,16 +83,4 @@ func (m model) View() string {
 	s += fmt.Sprintf("Time: %v  ", m.curTime)
 	s += m.progress
 	return s
-}
-
-func InitialModel(curTime time.Duration, totalPoms int8) model {
-	return model{curTime: curTime, poms: 0, totalPoms: totalPoms, progress: ""}
-}
-
-func main() {
-	p := tea.NewProgram(InitialModel(time.Minute, 10))
-	if _, err := p.Run(); err != nil {
-		fmt.Printf("There's been an error: %v", err)
-		os.Exit(1)
-	}
 }
