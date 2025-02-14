@@ -5,10 +5,9 @@ package main
 
 import (
 	"fmt"
-	"log"
-
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"log"
 )
 
 func main() {
