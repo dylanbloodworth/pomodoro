@@ -2,24 +2,28 @@ package usrinput
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
-
 	"github.com/charmbracelet/bubbles/cursor"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"strconv"
 )
 
+// usrInput is the global variable to log what the value of the textinput form.
 var usrInput string
 
+// model type for holding a textInput model
 type model struct {
 	textInput textinput.Model
 }
 
+// Init returns nil so no command is run at the beginning of the model
 func (m model) Init() tea.Cmd {
 	return nil
 }
 
+// Update returns an updated state of the textInput model. It tracks
+// the text input into the field and assigns the value of the global
+// usrInput variable.
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
@@ -27,37 +31,44 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		//then look at the key that was pressed
 		switch msg.String() {
-		//If the key was enter
+		//If the key was escape
 		case "esc":
-			//Return the model and quit
+			//Return quit the form input without doing anything else.
 			return m, tea.Quit
 		case "enter":
-			usrInput = strings.TrimSpace(strings.TrimPrefix(m.textInput.View(), "> "))
+			//track the final usrInput as a string and quit the program
+			usrInput = m.textInput.Value()
 			return m, tea.Quit
 		}
 	}
 
+	//handles user keystrokes in the form
 	m.textInput, cmd = m.textInput.Update(msg)
 	return m, cmd
 }
 
+// View renders the form by returning a string. Most of the rendering occurs in the textinput
+// bubbles UI component
 func (m model) View() string {
 	formHeading := "How many minutes will your focus sessions be?\n"
 	form := fmt.Sprint(m.textInput.View())
-	usrInput = m.textInput.Value()
 
 	return formHeading + form
 }
 
+// InitialModel defines the configs of the textinput model and returns
+// the type model defined at the start of the program.
 func InitialModel() model {
-	ti := textinput.New()
-	ti.Placeholder = "Please enter an integer value (e.g. 25)"
-	ti.Focus()
-	ti.Cursor.SetMode(cursor.CursorHide)
+	ti := textinput.New()                                      // declare new textinput. See textinput.New() definition to set configs
+	ti.Placeholder = "Please enter an integer value (e.g. 25)" // suggests a recommended pomodoro time
+	ti.Focus()                                                 // allows the form to receive keystrokes
+	ti.Cursor.SetMode(cursor.CursorHide)                       // hides the cursor in the form
 
 	return model{textInput: ti}
 }
 
+// UsrInput runs the program that asks the user to input their desired pomodoro focus time in minutes.
+// It returns the desired time in minutes as an integer.
 func UsrInput() int {
 	p := tea.NewProgram(InitialModel())
 
@@ -66,10 +77,10 @@ func UsrInput() int {
 		panic(err)
 	}
 
-	i, err := strconv.Atoi(usrInput)
+	minutes, err := strconv.Atoi(usrInput)
 	if err != nil {
 		panic(err)
 	}
 
-	return i
+	return minutes
 }
