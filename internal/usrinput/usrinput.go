@@ -1,19 +1,23 @@
-package main
+package usrinput
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+
+	"github.com/charmbracelet/bubbles/cursor"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"log"
 )
+
+var usrInput string
 
 type model struct {
 	textInput textinput.Model
-	usrInput  string
 }
 
 func (m model) Init() tea.Cmd {
-	return textinput.Blink
+	return nil
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -28,8 +32,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			//Return the model and quit
 			return m, tea.Quit
 		case "enter":
-			m.usrInput = m.textInput.View()
-			return m, nil
+			usrInput = strings.TrimSpace(strings.TrimPrefix(m.textInput.View(), "> "))
+			return m, tea.Quit
 		}
 	}
 
@@ -38,25 +42,34 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	form := fmt.Sprintf(
-		"What am I typing?, \n\n%s",
-		m.textInput.View(),
-	)
-	output := m.usrInput
+	formHeading := "How many minutes will your focus sessions be?\n"
+	form := fmt.Sprint(m.textInput.View())
+	usrInput = m.textInput.Value()
 
-	return form + "\n\n" + output
+	return formHeading + form
 }
 
 func InitialModel() model {
 	ti := textinput.New()
+	ti.Placeholder = "Please enter an integer value (e.g. 25)"
 	ti.Focus()
+	ti.Cursor.SetMode(cursor.CursorHide)
 
 	return model{textInput: ti}
 }
 
-func main() {
+func UsrInput() int {
 	p := tea.NewProgram(InitialModel())
-	if _, err := p.Run(); err != nil {
-		log.Fatal(err)
+
+	_, err := p.Run()
+	if err != nil {
+		panic(err)
 	}
+
+	i, err := strconv.Atoi(usrInput)
+	if err != nil {
+		panic(err)
+	}
+
+	return i
 }

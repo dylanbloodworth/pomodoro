@@ -18,6 +18,8 @@ var statusCodes map[int8]string = map[int8]string{
 	2: "Long Break",
 }
 
+var focusTime time.Duration
+
 // The pomodoro structure holds information about the state of the pomodoro application.
 type pomodoro struct {
 	curTime   time.Duration // The curTime field acts as the timer for the current status.
@@ -32,9 +34,10 @@ type pomodoro struct {
 //
 // The eventual goal should be to have curTime, poms, and totalPoms be user defined
 // fields before the pomodoro timer starts.
-func FocusModel() pomodoro {
+func FocusModel(focusMinutes int) pomodoro {
+	focusTime = time.Duration(focusMinutes) * time.Minute
 	return pomodoro{
-		curTime:   15 * time.Second,
+		curTime:   focusTime,
 		poms:      0,
 		totalPoms: 4,
 		status:    0,
@@ -94,15 +97,15 @@ func (p pomodoro) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				if p.poms%4 == 0 && p.poms != 0 {
 					p.status = 2
-					p.curTime = 10 * time.Second
+					p.curTime = focusTime / 2
 				} else {
 					p.status = 1
-					p.curTime = 5 * time.Second
+					p.curTime = focusTime / 5
 				}
 
 			default:
 				p.status = 0
-				p.curTime = 15 * time.Second
+				p.curTime = focusTime
 			}
 			return p, TickEvery()
 
