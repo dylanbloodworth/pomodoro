@@ -14,9 +14,12 @@ func main() {
 
 	focusMinutes := usrinput.UsrInput() //Starts the user input screen and returns the form value.
 
-	p := tea.NewProgram(pomodoro.FocusModel(focusMinutes)) //starts the pomodoro timer
-	if _, err := p.Run(); err != nil {
-		fmt.Printf("There's been an error: %v", err)
-		os.Exit(1)
+	if focusMinutes != 0 {
+		p := tea.NewProgram(pomodoro.FocusModel(focusMinutes)) //starts the pomodoro timer
+		if _, err := p.Run(); err != nil {
+			fmt.Printf("There's been an error: %v", err)
+			os.Exit(1)
+		}
+
 	}
 }

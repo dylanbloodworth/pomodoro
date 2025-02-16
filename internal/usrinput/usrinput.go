@@ -15,7 +15,8 @@ var usrInput string
 
 // model type for holding a textInput model
 type model struct {
-	textInput textinput.Model
+	textInput   textinput.Model
+	clearScreen bool
 }
 
 // Init returns nil so no command is run at the beginning of the model
@@ -36,11 +37,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		//If the key was escape
 		case "esc":
 			//Return quit the form input without doing anything else.
-			return m, tea.Quit
+			return model{clearScreen: true}, tea.Quit
 		case "enter":
 			//track the final usrInput as a string and quit the program
 			usrInput = m.textInput.Value()
-			return m, tea.Quit
+			return model{clearScreen: true}, tea.Quit
 		}
 	}
 
@@ -52,6 +53,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 // View renders the form by returning a string. Most of the rendering occurs in the textinput
 // bubbles UI component
 func (m model) View() string {
+
+	if m.clearScreen {
+		return ""
+	}
 
 	formHeading := "How many minutes will your focus sessions be?\n"
 	form := fmt.Sprint(m.textInput.View())
@@ -68,7 +73,7 @@ func InitialModel() model {
 	ti.Cursor.SetMode(cursor.CursorHide)                                   // hides the cursor in the form
 	ti.PromptStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("177")) // change the color of the '>' in the prompt
 
-	return model{textInput: ti}
+	return model{textInput: ti, clearScreen: false}
 }
 
 // UsrInput runs the program that asks the user to input their desired pomodoro focus time in minutes.
@@ -81,10 +86,14 @@ func UsrInput() int {
 		panic(err)
 	}
 
-	minutes, err := strconv.Atoi(usrInput)
-	if err != nil {
-		panic(err)
+	if usrInput != "" {
+		minutes, err := strconv.Atoi(usrInput)
+		if err != nil {
+			panic(err)
+		}
+		return minutes
+	} else {
+		fmt.Print("No Input Provided")
+		return 0
 	}
-
-	return minutes
 }
