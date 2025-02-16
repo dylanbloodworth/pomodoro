@@ -2,10 +2,12 @@ package usrinput
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/charmbracelet/bubbles/cursor"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"strconv"
+	"github.com/charmbracelet/lipgloss"
 )
 
 // usrInput is the global variable to log what the value of the textinput form.
@@ -50,19 +52,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 // View renders the form by returning a string. Most of the rendering occurs in the textinput
 // bubbles UI component
 func (m model) View() string {
+
 	formHeading := "How many minutes will your focus sessions be?\n"
 	form := fmt.Sprint(m.textInput.View())
 
-	return formHeading + form
+	return lipgloss.NewStyle().Padding(1, 0, 0, 2).Foreground(lipgloss.Color("231")).Render(formHeading + form)
 }
 
 // InitialModel defines the configs of the textinput model and returns
 // the type model defined at the start of the program.
 func InitialModel() model {
-	ti := textinput.New()                                      // declare new textinput. See textinput.New() definition to set configs
-	ti.Placeholder = "Please enter an integer value (e.g. 25)" // suggests a recommended pomodoro time
-	ti.Focus()                                                 // allows the form to receive keystrokes
-	ti.Cursor.SetMode(cursor.CursorHide)                       // hides the cursor in the form
+	ti := textinput.New()                                                  // declare new textinput. See textinput.New() definition to set configs
+	ti.Placeholder = "Please enter an integer value (e.g. 25)"             // suggests a recommended pomodoro time
+	ti.Focus()                                                             // allows the form to receive keystrokes
+	ti.Cursor.SetMode(cursor.CursorHide)                                   // hides the cursor in the form
+	ti.PromptStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("177")) // change the color of the '>' in the prompt
 
 	return model{textInput: ti}
 }
