@@ -1,7 +1,7 @@
 // The pomodoro package creates an application for implementing the pomodoro
 // technique (https://en.wikipedia.org/wiki/Pomodoro_Technique). It renders a
 // TUI that runs a pomodoro timer with user defined timing conditions.
-package pomodoro
+package timer
 
 import (
 	"fmt"

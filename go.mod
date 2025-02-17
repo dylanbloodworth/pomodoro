@@ -1,4 +1,4 @@
-module github.com/dylanbloodworth/charm
+module github.com/dylanbloodworth/pomodoro
 
 go 1.23.2
 
