@@ -23,10 +23,9 @@ var focusTime time.Duration
 // The pomodoro structure holds information about the state of the pomodoro application.
 type pomodoro struct {
 	curTime   time.Duration // The curTime field acts as the timer for the current status.
-	poms      int8          // The poms field indicates the number of poms cycle currently completed.
-	totalPoms int8          // The totalPoms field indicates the total number of pomodoro cycles to complete.
+	poms      int           // The poms field indicates the number of poms cycle currently completed.
+	totalPoms int           // The totalPoms field indicates the total number of pomodoro cycles to complete.
 	status    int8          // The status field tracks the current status of the pomodoro cycle.
-	progress  string        // The progress field is a string representation of the progress bar to be rendered on the TUI.
 }
 
 // FocusModel initializes a pomodoro model with some initial state. It returns
@@ -34,14 +33,14 @@ type pomodoro struct {
 //
 // The eventual goal should be to have curTime, poms, and totalPoms be user defined
 // fields before the pomodoro timer starts.
-func FocusModel(focusMinutes int) pomodoro {
-	focusTime = time.Duration(focusMinutes) * time.Minute
+func FocusModel(minutes int, totalPoms int) pomodoro {
+	focusTime = time.Duration(minutes) * time.Minute
 	return pomodoro{
 		curTime:   focusTime,
 		poms:      0,
-		totalPoms: 4,
+		totalPoms: totalPoms,
 		status:    0,
-		progress:  ""}
+	}
 }
 
 // Create a Msg to update the module based on time
@@ -86,7 +85,6 @@ func (p pomodoro) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		switch p.curTime {
 		case 0:
-			p.progress = " "
 
 			switch p.status {
 			case 0:
@@ -111,9 +109,6 @@ func (p pomodoro) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		default:
 			p.curTime -= time.Second
-			if p.curTime%(time.Second) == 0 {
-				p.progress += "%"
-			}
 			return p, TickEvery()
 		}
 	}

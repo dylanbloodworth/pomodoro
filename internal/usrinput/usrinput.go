@@ -10,13 +10,13 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// usrInput is the global variable to log what the value of the textinput form.
-var usrInput string
+var usrInput []string = make([]string, 2)
 
 // model type for holding a textInput model
 type model struct {
-	textInput   textinput.Model
-	clearScreen bool
+	textInput      textinput.Model
+	textInputCount int8
+	clearScreen    bool
 }
 
 // Init returns nil so no command is run at the beginning of the model
@@ -39,12 +39,24 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			//Return quit the form input without doing anything else.
 			return model{clearScreen: true}, tea.Quit
 		case "enter":
-			//track the final usrInput as a string and quit the program
-			usrInput = m.textInput.Value()
-			return model{clearScreen: true}, tea.Quit
+
+			//Log input of current field
+			usrInput[m.textInputCount] = m.textInput.Value()
+			m.textInputCount += 1
+
+			//Check
+			if int(m.textInputCount) == len(usrInput) {
+				return model{clearScreen: true}, tea.Quit
+			}
+
+			ti := textinput.New()
+			ti.Focus()
+			ti.Placeholder = "Please enter an integer value (e.g. 4)"
+			ti.PromptStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("177")) // change the color of the '>' in the prompt
+
+			return model{textInput: ti, textInputCount: m.textInputCount}, nil
 		}
 	}
-
 	//handles user keystrokes in the form
 	m.textInput, cmd = m.textInput.Update(msg)
 	return m, cmd
@@ -58,10 +70,16 @@ func (m model) View() string {
 		return ""
 	}
 
-	formHeading := "How many minutes will your focus sessions be?\n"
-	form := fmt.Sprint(m.textInput.View())
+	var formHeading string
 
-	return lipgloss.NewStyle().Padding(1, 0, 0, 2).Foreground(lipgloss.Color("231")).Render(formHeading + form)
+	if m.textInputCount == 0 {
+		formHeading = "How many minutes will your focus sessions be?\n"
+	} else if m.textInputCount == 1 {
+		formHeading = "How many pomodoro cycles do you want to study for?\n"
+	}
+
+	form := fmt.Sprint(m.textInput.View())
+	return lipgloss.NewStyle().Padding(1, 0, 3, 2).Foreground(lipgloss.Color("231")).Render(formHeading + form)
 }
 
 // InitialModel defines the configs of the textinput model and returns
@@ -73,12 +91,12 @@ func InitialModel() model {
 	ti.Cursor.SetMode(cursor.CursorHide)                                   // hides the cursor in the form
 	ti.PromptStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("177")) // change the color of the '>' in the prompt
 
-	return model{textInput: ti, clearScreen: false}
+	return model{textInput: ti, textInputCount: 0, clearScreen: false}
 }
 
 // UsrInput runs the program that asks the user to input their desired pomodoro focus time in minutes.
 // It returns the desired time in minutes as an integer.
-func UsrInput() int {
+func UsrInput() (int, int) {
 	p := tea.NewProgram(InitialModel())
 
 	_, err := p.Run()
@@ -86,14 +104,17 @@ func UsrInput() int {
 		panic(err)
 	}
 
-	if usrInput != "" {
-		minutes, err := strconv.Atoi(usrInput)
-		if err != nil {
-			panic(err)
+	if usrInput[0] != "" && usrInput[1] != "" {
+		minutes, err1 := strconv.Atoi(usrInput[0])
+		poms, err2 := strconv.Atoi(usrInput[1])
+		if err1 != nil || err2 != nil {
+			fmt.Print(err1)
+			fmt.Print(err2)
 		}
-		return minutes
+		return minutes, poms
+
 	} else {
 		fmt.Print("No Input Provided")
-		return 0
+		return 0, 0
 	}
 }
