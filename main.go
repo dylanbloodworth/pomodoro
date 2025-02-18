@@ -1,3 +1,5 @@
+// Intializes a pomodoro application that asks the user for input, and it
+// creates a timer based on that input.
 package main
 
 import (
@@ -5,8 +7,8 @@ import (
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/dylanbloodworth/pomodoro/internal/timer"
-	"github.com/dylanbloodworth/pomodoro/internal/usrinput"
+	"github.com/dylanbloodworth/pomodoro/pkg/timer"
+	"github.com/dylanbloodworth/pomodoro/pkg/usrinput"
 )
 
 // main runs the pomodoro application
